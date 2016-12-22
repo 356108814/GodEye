@@ -1,0 +1,6 @@
+# spark-submit --master local[2] --conf "spark.dynamicAllocation.enabled=false" --py-files /root/DataCompute/python /root/DataCompute/python/main.py
+#spark-submit --master local[2] \
+#--conf "spark.dynamicAllocation.enabled=false" --py-files /root/DataCompute/python/module.zip /root/DataCompute/python/main.py
+
+spark-submit --master yarn --deploy-mode client --executor-memory 2g \
+--conf "spark.dynamicAllocation.enabled=true" --py-files /var/lib/hadoop-hdfs/DataCompute/python/module.zip /var/lib/hadoop-hdfs/DataCompute/python/main.py

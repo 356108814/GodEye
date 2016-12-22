@@ -1,0 +1,15 @@
+#!/bin/bash
+job_file=$1
+param1=$2
+param2=$3
+spark-submit \
+    --name DataCompute-Python \
+    --master spark://CDH-0:7077 \
+    --num-executors 100 \
+    --executor-cores 4 \
+    --executor-memory 3g \
+    --conf spark.dynamicAllocation.enabled=false \
+    --conf spark.default.parallelism=800 \
+    --py-files /var/lib/hadoop-hdfs/DataCompute/python/module.zip \
+    /var/lib/hadoop-hdfs/DataCompute/python/job/${job_file} \
+    ${param1} ${param2}

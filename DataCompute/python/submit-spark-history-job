@@ -1,0 +1,8 @@
+#!/bin/bash
+
+job_file=$1
+
+for id in 20 21 22 23 24 25 26 27 28 29 30
+do
+    ./submit-spark-job ${job_file} 2016-09-${id}
+done

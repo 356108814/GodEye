@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <!-- CSS goes in the document HEAD or added to your external stylesheet -->
+    <style type="text/css">
+        .container {
+            align-content: center;
+        }
+        table.gridTable {
+            font-family: verdana,arial,sans-serif;
+            font-size:11px;
+            color:#333333;
+            border: 1px #666666;
+            border-collapse: collapse;
+        }
+        table.gridTable th {
+            padding: 8px;
+            border: 1px solid #666666;
+            background-color: #dedede;
+        }
+        table.gridTable td {
+            padding: 8px;
+            border: 1px solid #666666;
+            background-color: #ffffff;
+        }
+        .raise {
+            color: red;
+            font-weight: bold;
+        }
+        .reduce {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{title}}</h1>
+    <div>
+        <h2>概况：</h2>
+        <!--定义宏-->
+        {% macro increment_text(increment) -%}
+            {% if increment > 0 %}
+                <span class="raise">增加{{increment}}</span>
+            {% else %}
+                <span class="reduce">减少{{increment|abs}}</span>
+            {% endif %}
+        {%- endmacro %}
+
+        <p><b>总营收：</b>昨日总营收{{overview.revenue.total}}元，相比前日{{increment_text(overview.revenue.increment)}}元。
+        </p>
+        <p><b>用户：</b>昨日活跃用户数为{{overview.user_count.dau}}，相比前日{{increment_text(overview.user_count.dau_increment)}}人；净增长用户数为{{overview.user_count.growth}}人，相比前日{{increment_text(overview.user_count.growth_increment)}}人。<p>
+        <p><b>演唱局数：</b>昨日演唱总局数为{{overview.game_session.total}}局，相比前日{{increment_text(overview.game_session.increment)}}局。<p>
+        <p><b>点播量：</b>昨日点播量为{{overview.play_count.total}}，相比前日{{increment_text(overview.play_count.increment)}}。<p>
+        <p><b>歌手点播排行：</b>
+            {% if overview.singer.new_in %}
+                <p>新进入榜单的歌手有：</p>
+                {% for new in overview.singer.new_in %}
+                    {{new.data.singer_name}} (排名：{{new.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+
+            {% if overview.singer.old_out %}
+                <p>跌出榜单的歌手有：</p>
+                {% for old in overview.singer.old_out %}
+                    {{old.data.singer_name}} (原排名：{{old.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+
+            {% if overview.singer.rank_changed %}
+                <p>榜单排名发生变化的歌手有：</p>
+                {% for c in overview.singer.rank_changed %}
+                    {{c.new.data.singer_name}} (新排名：{{c.new.rank}}， 原排名：{{c.old.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+        <p>
+        <p><b>歌曲点播排行：</b>
+            {% if overview.song.new_in %}
+                <p>新进入榜单的歌曲有：</p>
+                {% for new in overview.song.new_in %}
+                    {{new.data.song_name}} (排名：{{new.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+
+            {% if overview.song.old_out %}
+                <p>跌出榜单的歌曲有：</p>
+                {% for old in overview.song.old_out %}
+                    {{old.data.song_name}} (原排名：{{old.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+
+            {% if overview.song.rank_changed %}
+                <p>榜单排名发生变化的歌曲有：</p>
+                {% for c in overview.song.rank_changed %}
+                    {{c.new.data.song_name}} (新排名：{{c.new.rank}}， 原排名：{{c.old.rank}}) &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
+        <p>
+    </div>
+    <div class="container">
+        <h2>详细数据</h2>
+        <h4>营收概况（货币单位：元）</h4>
+        <table class="gridTable">
+            <tr>
+                <th>日期</th>
+                <th>总营收</th>
+                <th>移动支付</th>
+                <th>投币</th>
+                <th>单点</th>
+                <th>包时15分钟</th>
+                <th>包时30分钟</th>
+                <th>包时60分钟</th>
+                <th>包曲3首</th>
+                <th>包曲7首</th>
+                <th>包曲10首</th>
+            </tr>
+            {% for income in incomes %}
+            <tr>
+                <td>{{income['date']}}</td>
+                <td>{{income['total']}}</td>
+                <td>{{income['mobile_pay']}}</td>
+                <td>{{income['coin']}}</td>
+                <td>{{income['single']}}</td>
+                <td>{{income['time15']}}</td>
+                <td>{{income['time30']}}</td>
+                <td>{{income['time60']}}</td>
+                <td>{{income['songs3']}}</td>
+                <td>{{income['songs7']}}</td>
+                <td>{{income['songs10']}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div>
+            <div style="float: left; margin-right:50px;">
+                <h4>用户概况</h4>
+                <table class="gridTable">
+                    <tr>
+                        <th>日期</th>
+                        <th>累计用户</th>
+                        <th>活跃用户</th>
+                        <th>净增长</th>
+                        <th>新关注</th>
+                        <th>取消关注</th>
+                    </tr>
+                    {% for uc in user_counts %}
+                    <tr>
+                        <td>{{uc['date']}}</td>
+                        <td>{{uc['total']}}</td>
+                        <td>{{uc['dau']}}</td>
+                        <td>{{uc['add'] - uc['lost']}}</td>
+                        <td>{{uc['add']}}</td>
+                        <td>{{uc['lost']}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div style="float: left; margin-right:50px;">
+                <h4>演唱局数</h4>
+                <table class="gridTable">
+                    <tr>
+                        <th>日期</th>
+                        <th>总局数</th>
+                        <th>付费</th>
+                        <th>免费</th>
+                        <th>匿名</th>
+                        <th>登陆</th>
+                    </tr>
+                    {% for session in game_sessions %}
+                    <tr>
+                        <td>{{session['date']}}</td>
+                        <td>{{session['total']}}</td>
+                        <td>{{session['cost']}}</td>
+                        <td>{{session['free']}}</td>
+                        <td>{{session['anonymous']}}</td>
+                        <td>{{session['login']}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div style="float: left; margin-right:50px;">
+                <h4>点播量</h4>
+                <table class="gridTable">
+                    <tr>
+                        <th>日期</th>
+                        <th>总计</th>
+                        <th>付费</th>
+                        <th>免费</th>
+                        <th>匿名</th>
+                        <th>登陆</th>
+                    </tr>
+                    {% for count in play_counts %}
+                    <tr>
+                        <td>{{count['date']}}</td>
+                        <td>{{count['total']}}</td>
+                        <td>{{count['cost']}}</td>
+                        <td>{{count['free']}}</td>
+                        <td>{{count['anonymous']}}</td>
+                        <td>{{count['login']}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                </div>
+            <div style="clear:both;"></div>
+        </div>
+
+        <h4>歌手点播排行Top10</h4>
+        <table class="gridTable">
+            <tr>
+                <th>日期</th>
+                <th>Top1</th>
+                <th>Top2</th>
+                <th>Top3</th>
+                <th>Top4</th>
+                <th>Top5</th>
+                <th>Top6</th>
+                <th>Top7</th>
+                <th>Top8</th>
+                <th>Top9</th>
+                <th>Top10</th>
+            </tr>
+            {% for top_singer in top_singers %}
+            <tr>
+                <td>{{top_singer['date']}}</td>
+                {% for singer in top_singer['singers'] %}
+                <td>{{singer['singer_name']}} （ID:{{singer['singer_id']}}） {{singer['count']}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h4>歌曲点播排行Top10</h4>
+        <table class="gridTable">
+            <tr>
+                <th>日期</th>
+                <th>Top1</th>
+                <th>Top2</th>
+                <th>Top3</th>
+                <th>Top4</th>
+                <th>Top5</th>
+                <th>Top6</th>
+                <th>Top7</th>
+                <th>Top8</th>
+                <th>Top9</th>
+                <th>Top10</th>
+            </tr>
+            {% for top_song in top_songs %}
+            <tr>
+                <td>{{top_song['date']}}</td>
+                {% for song in top_song['songs'] %}
+                <td>{{song['song_name']}} （ID:{{song['song_id']}}） {{song['count']}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
